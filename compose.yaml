@@ -5,7 +5,7 @@ services:
     init: true
     restart: unless-stopped
     ports:
-      - "${TOSUB2_BIND_ADDRESS:-127.0.0.1}:${TOSUB2_PORT:-4399}:4399"
+      - "${TOSUB2_BIND_ADDRESS:-0.0.0.0}:${TOSUB2_PORT:-4399}:4399"
     volumes:
       - tosub2-data:/data
     extra_hosts:
