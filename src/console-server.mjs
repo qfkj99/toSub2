@@ -128,7 +128,7 @@ const vite = await createViteServer({
   plugins: [react()],
   server: {
     middlewareMode: true,
-    hmr: { port: hmrPort, clientPort: hmrPort },
+    hmr: process.env.TOSUB2_DISABLE_HMR === "1" ? false : { port: hmrPort, clientPort: hmrPort },
   },
 });
 

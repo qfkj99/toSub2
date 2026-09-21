@@ -1,0 +1,16 @@
+**
+!Dockerfile
+!package.json
+!package-lock.json
+!requirements.txt
+!src/
+!src/**
+!web/
+!web/**
+**/__pycache__/
+**/*.py[cod]
+**/node_modules/
+web/dist/
+**/.env
+**/.env.*
+**/*.log

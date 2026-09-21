@@ -74,6 +74,49 @@ npm run dev -- --host 0.0.0.0
 
 局域网模式没有访问认证，只应在可信网络内短时间使用。
 
+### Docker 部署
+
+安装 Docker Engine / Docker Desktop 和 Docker Compose 后，在项目目录执行（Docker Desktop 使用 Linux 容器）：
+
+```bash
+docker compose up -d --build
+docker compose ps
+docker compose logs -f
+```
+
+浏览器打开 `http://127.0.0.1:4399`。镜像包含 Node.js 22、Python 和 `curl_cffi`，以非 root 用户运行；Compose 负责进程回收、异常重启和数据卷挂载，无需额外运行 PM2。容器关闭前有 30 秒用于保存任务状态。容器内关闭前端热更新，不需要映射额外的 WebSocket 端口。
+
+默认只开放宿主机本地访问。需要修改端口或允许局域网访问时，在项目根目录新建 `.env`，填写：
+
+```dotenv
+TOSUB2_BIND_ADDRESS=0.0.0.0
+TOSUB2_PORT=4400
+```
+
+随后执行 `docker compose up -d`。控制台没有访问认证，不能直接暴露到公网；远程使用应通过 SSH 隧道或带身份认证的反向代理访问。
+
+任务、Cookie、授权令牌、登录检查点和巡检配置保存在命名卷 `tosub2-data`（容器路径 `/data`）中。`docker compose down` 不会删除数据；不要使用 `docker compose down -v`，除非确定要清空数据。备份时应先停止服务，再备份该数据卷。
+
+如需迁移原有任务，可先执行 `docker compose create`，再将原数据目录的内容复制到容器中：
+
+```bash
+docker compose cp ./tmp/chatgpt-onboarding-console/. tosub2:/data
+docker compose run --rm --no-deps --user root tosub2 chown -R node:node /data
+docker compose up -d
+```
+
+Docker 中运行的是 Linux：现有程序不在 Linux 持久保存密码、2FA 密钥和账号代理，重启后需要重新提供，依赖这些凭据的自动修复也受此限制。Windows DPAPI / macOS Keychain 的凭据不能通过复制任务目录迁移。
+
+容器里的 `127.0.0.1` 指向容器自身。代理、邮箱 API 或 Sub2API 位于宿主机时，使用 `host.docker.internal`，例如 `http://host.docker.internal:8080`，并确保宿主机服务监听容器可访问的地址。其他 Compose 服务可使用同一 Docker 网络中的服务名。
+
+更新与停止：
+
+```bash
+git pull
+docker compose up -d --build
+docker compose down
+```
+
 ### PM2（Node.js 进程管理器）守护运行
 
 号池巡检依赖控制台服务持续运行。需要崩溃后自动重启或开机启动时，建议使用项目内置的 PM2 配置：

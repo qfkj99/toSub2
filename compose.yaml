@@ -1,0 +1,16 @@
+services:
+  tosub2:
+    build: .
+    image: tosub2:local
+    init: true
+    restart: unless-stopped
+    ports:
+      - "${TOSUB2_BIND_ADDRESS:-127.0.0.1}:${TOSUB2_PORT:-4399}:4399"
+    volumes:
+      - tosub2-data:/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    stop_grace_period: 30s
+
+volumes:
+  tosub2-data:
