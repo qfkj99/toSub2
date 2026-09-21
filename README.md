@@ -91,11 +91,14 @@ docker compose logs -f
 ```dotenv
 TOSUB2_BIND_ADDRESS=0.0.0.0
 TOSUB2_PORT=4400
+TOSUB2_ALLOWED_HOST=tosub2.tibo.chat
 ```
 
 随后执行 `docker compose up -d`，并相应调整防火墙和安全组端口。已有 `.env` 中的 `TOSUB2_BIND_ADDRESS` 会覆盖默认值；如果原来设为 `127.0.0.1`，请改为 `0.0.0.0` 才能通过服务器 IP 访问。控制台没有访问认证，不应向所有公网来源开放。需要恢复仅本机访问时，将该变量设为 `127.0.0.1`，并通过 SSH 隧道或带身份认证的反向代理访问。
 
 任务、Cookie、授权令牌、登录检查点和巡检配置保存在命名卷 `tosub2-data`（容器路径 `/data`）中。`docker compose down` 不会删除数据；不要使用 `docker compose down -v`，除非确定要清空数据。备份时应先停止服务，再备份该数据卷。
+
+域名访问默认允许 `tosub2.tibo.chat`。使用其他域名时，在 `.env` 中设置 `TOSUB2_ALLOWED_HOST=你的域名`（不带协议、端口或路径），再执行 `docker compose up -d`。Compose 将该值传给 Vite 的额外允许域名配置，保留 Host 校验；IP 和 localhost 访问不受影响。本项目以代码创建 Vite 服务，不读取 `vite.config.js`。
 
 如需迁移原有任务，可先执行 `docker compose create`，再将原数据目录的内容复制到容器中：
 

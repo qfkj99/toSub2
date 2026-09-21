@@ -4,6 +4,8 @@ services:
     image: tosub2:local
     init: true
     restart: unless-stopped
+    environment:
+      __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: "${TOSUB2_ALLOWED_HOST:-tosub2.tibo.chat}"
     ports:
       - "${TOSUB2_BIND_ADDRESS:-0.0.0.0}:${TOSUB2_PORT:-4399}:4399"
     volumes:
